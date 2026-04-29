@@ -8,6 +8,12 @@ const firebaseConfig = {
   appId: "1:313225166201:web:afc108766e42b9797143a8",
    measurementId: "G-KWLHM010X3"
 };
+// 2. التهيئة (هذا الجزء يجب أن يسبق أي دالة أخرى)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const auth = firebase.auth();
 
 // تشغيل فايربيس
 firebase.initializeApp(firebaseConfig);
@@ -19,10 +25,13 @@ document.getElementById('currentYear').innerText = new Date().getFullYear();
 // وظيفة التنقل
 function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    document.getElementById(id + '-section').classList.remove('hidden');
+    const section = document.getElementById(id + '-section');
+    if(section) section.classList.remove('hidden');
     window.scrollTo(0,0);
 }
 
+
+  
 // عداد الكلمات وتصفيره
 function countWords() {
     let title = document.getElementById('newsTitle').value.trim();
@@ -91,12 +100,16 @@ function loadNews() {
         });
     });
 }
-
+// دالة التسجيل (ستعمل الآن لأن auth تم تعريفه في الأعلى)
+        
+}
 // نظام تسجيل الدخول والخروج
 function handleSignUp() {
     const email = document.getElementById('userEmail').value;
     const pass = document.getElementById('userPass').value;
-    auth.createUserWithEmailAndPassword(email, pass).then(() => { alert("تم تسجيلك!"); showSection('home'); });
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then(() => { alert("تم تسجيلك!"); showSection('home'); })
+  .catch(err => { alert(err.message); });
 }
 
 function handleAuth() {
