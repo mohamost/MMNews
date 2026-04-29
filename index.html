@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وكالة محمد مصطفى للأنباء</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDKs (Compat Version) -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+</head>
+<body class="dark-mode">
+
+    <header>
+        <div class="adsense-banner">
+            <!-- بنر أدسنس علوي -->
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2350229233880702" data-ad-slot="1234567890" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        <nav>
+            <div class="logo">🍉 وكالة محمد مصطفى للأنباء</div>
+            <div class="nav-links">
+                <button onclick="showSection('home')">الرئيسية</button>
+                <button onclick="showSection('about')">من نحن</button>
+                <button id="loginBtn" onclick="showSection('auth')">دخول / تسجيل</button>
+                <button id="adminBtn" class="hidden" onclick="showSection('admin')">لوحة التحكم</button>
+                <button id="logoutBtn" class="hidden" onclick="handleLogout()">تسجيل خروج</button>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <!-- واجهة 1: الأخبار العامة -->
+        <section id="home-section" class="section">
+            <h2 class="section-title">أحدث الأخبار الحصرية</h2>
+            <div id="news-container">جاري تحميل الأخبار...</div>
+        </section>
+
+        <!-- واجهة تسجيل الدخول والمشتركين -->
+        <section id="auth-section" class="section hidden">
+            <div class="auth-box">
+                <h3>تسجيل الدخول / مشترك جديد</h3>
+                <input type="email" id="userEmail" placeholder="البريد الإلكتروني">
+                <input type="password" id="userPass" placeholder="كلمة المرور">
+                <button class="btn-post" onclick="handleAuth()">دخول</button>
+                <button class="btn-alt" onclick="handleSignUp()">تسجيل مشترك جديد</button>
+            </div>
+        </section>
+
+        <!-- واجهة 3: لوحة التحكم (الموظف) -->
+        <section id="admin-section" class="section hidden">
+            <div class="admin-grid">
+                <div class="add-news-form">
+                    <h3>إضافة خبر جديد (الموظف)</h3>
+                    <input type="text" id="newsTitle" placeholder="العنوان (بحد أقصى 15 كلمة)" onkeyup="countWords()">
+                    <small id="wordCountText">الكلمات: 0/15</small>
+                    <textarea id="newsContent" rows="5" placeholder="التفاصيل الكاملة للخبر..."></textarea>
+                    <p>رفع الوسائط: <input type="file" id="newsMedia" accept="image/*,video/*"></p>
+                    <button class="btn-post" onclick="uploadNews()">نشر الخبر الآن 🍉</button>
+                </div>
+                <div class="news-manager">
+                    <h3>إدارة الأرشيف (تعديل/حذف)</h3>
+                    <div id="manage-news-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- واجهة من نحن -->
+        <section id="about-section" class="section hidden">
+            <div class="about-card">
+                <h3>معلومات الوكالة</h3>
+                <p><strong>رئيس التحرير:</strong> محمد مصطفى مصطفى</p>
+                <p><strong>العنوان:</strong> دولة فلسطين - قطاع غزة - بيت لاهيا</p>
+                <p><strong>الهاتف:</strong> <a href="tel:+970595594653">+970 595594653</a></p>
+                <p><strong>واتس:</strong> <a href="https://wa.me">+972 595594653</a></p>
+                <p><strong>إيميل:</strong> moha.most@gmail.com</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="adsense-banner">
+            <!-- بنر أدسنس سفلي -->
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2350229233880702" data-ad-slot="0987654321" data-ad-format="auto"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        <p>جميع الحقوق محفوظة &copy; <span id="currentYear"></span> - وكالة محمد مصطفى للأنباء</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

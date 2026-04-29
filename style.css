@@ -1,0 +1,66 @@
+:root {
+    --bg-dark: #0a0a0a;
+    --card-bg: #161616;
+    --pal-red: #ee2a35;
+    --pal-green: #009739;
+    --text-white: #ffffff;
+    --text-gray: #b0b0b0;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; min-height: 100vh;
+}
+
+header {
+    background-color: #000;
+    border-bottom: 3px solid var(--pal-green);
+    position: fixed; top: 0; width: 100%; z-index: 1000;
+}
+
+footer {
+    background-color: #000;
+    border-top: 3px solid var(--pal-red);
+    position: fixed; bottom: 0; width: 100%; z-index: 1000;
+    text-align: center; padding: 10px 0;
+}
+
+main { margin-top: 160px; margin-bottom: 120px; flex: 1; }
+
+nav { display: flex; justify-content: space-around; align-items: center; padding: 10px; }
+.logo { font-weight: bold; color: var(--pal-green); font-size: 1.2rem; }
+
+.section { padding: 20px; max-width: 900px; margin: auto; }
+.hidden { display: none !important; }
+
+.news-card {
+    background: var(--card-bg);
+    border-right: 5px solid var(--pal-red);
+    margin-bottom: 20px; padding: 20px; border-radius: 10px;
+}
+
+.news-card h4 { color: var(--pal-green); margin-top: 0; }
+
+input, textarea {
+    width: 100%; padding: 12px; margin: 10px 0;
+    background: #222; border: 1px solid #444; color: white; border-radius: 5px;
+}
+
+button {
+    font-family: 'Cairo'; padding: 10px 20px; border-radius: 5px; cursor: pointer; border: none;
+}
+
+.btn-post { background: var(--pal-green); color: black; font-weight: bold; width: 100%; }
+.btn-details { background: var(--pal-red); color: white; margin-left: 10px; }
+.btn-alt { background: transparent; border: 1px solid var(--text-gray); color: white; margin-top: 10px; width: 100%; }
+
+.auth-box { background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--pal-green); max-width: 400px; margin: auto; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+@media (max-width: 768px) {
+    .admin-grid { grid-template-columns: 1fr; }
+    main { margin-top: 200px; }
+}
