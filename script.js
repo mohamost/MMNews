@@ -5,7 +5,8 @@ const firebaseConfig = {
   projectId: "mmmmnewsagency",
   storageBucket: "mmmmnewsagency.firebasestorage.app",
   messagingSenderId: "313225166201",
-  appId: "1:313225166201:web:afc108766e42b9797143a8"
+  appId: "1:313225166201:web:afc108766e42b9797143a8",
+   measurementId: "G-KWLHM010X3"
 };
 
 // تشغيل فايربيس
