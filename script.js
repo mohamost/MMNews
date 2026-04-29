@@ -1,83 +1,109 @@
-// --- إعدادات فايربيس (ضع بياناتك هنا) ---
+// 1. إعدادات فايربيس الخاصة بك
 const firebaseConfig = {
-  apiKey: "AIzaSyA52wrR30FbuHy9IAQkDyMODKRNHlUecKA", 
+  apiKey: "AIzaSyA52wrR30FbuHy9IAQkDyMODKRNHlUecKA",
   authDomain: "mmmmnewsagency.firebaseapp.com",
   projectId: "mmmmnewsagency",
   storageBucket: "mmmmnewsagency.firebasestorage.app",
   messagingSenderId: "313225166201",
   appId: "1:313225166201:web:afc108766e42b9797143a8",
-   measurementId: "G-KWLHM010X3"
+  measurementId: "G-KWLHM010X3"
 };
-// 2. التهيئة (هذا الجزء يجب أن يسبق أي دالة أخرى)
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
-const auth = firebase.auth();
 
-// تشغيل فايربيس
+// 2. التهيئة الفورية (يجب أن تكون في البداية)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// تحديث السنة في الفوتر تلقائياً
 document.getElementById('currentYear').innerText = new Date().getFullYear();
 
-// وظيفة التنقل
+// --- دوال التنقل والصلاحيات ---
+
 function showSection(id) {
     document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    const section = document.getElementById(id + '-section');
-    if(section) section.classList.remove('hidden');
-    window.scrollTo(0,0);
+    const target = document.getElementById(id + '-section');
+    if(target) target.classList.remove('hidden');
+    window.scrollTo(0, 0);
 }
 
+// مراقبة حالة المستخدم (هل هو داخل أم خارج)
+auth.onAuthStateChanged(user => {
+    const loginBtn = document.getElementById('loginBtn');
+    const adminBtn = document.getElementById('adminBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-  
-// عداد الكلمات وتصفيره
+    if (user) {
+        loginBtn.classList.add('hidden');
+        adminBtn.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+    } else {
+        loginBtn.classList.remove('hidden');
+        adminBtn.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+    }
+    loadNews(); // تحديث الأخبار بناءً على الحالة الجديدة
+});
+
+// --- دوال الأخبار (الموظف) ---
+
 function countWords() {
     let title = document.getElementById('newsTitle').value.trim();
     let words = title.split(/\s+/).filter(w => w.length > 0);
     document.getElementById('wordCountText').innerText = `الكلمات: ${words.length}/15`;
-    if(words.length > 15) alert("العنوان لا يجب أن يتجاوز 15 كلمة!");
-}
-
-// إضافة خبر جديد (للموظف)
-async function uploadNews() {
-    const title = document.getElementById('newsTitle').value;
-    const content = document.getElementById('newsContent').value;
-
-    if(!title || !content) return alert("أكمل البيانات أولاً");
-
-    await db.collection("news_posts").add({
-        title: title,
-        content: content,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // منطق الـ 150 عنوان
-    const snapshot = await db.collection("news_posts").orderBy("timestamp", "desc").get();
-    if(snapshot.size > 150) {
-        await db.collection("news_posts").doc(snapshot.docs[snapshot.size-1].id).delete();
+    if(words.length > 15) {
+        document.getElementById('wordCountText').style.color = "red";
+    } else {
+        document.getElementById('wordCountText').style.color = "#ee2a35";
     }
-
-    alert("تم النشر بنجاح!");
-    document.getElementById('newsTitle').value = "";
-    document.getElementById('newsContent').value = "";
-    document.getElementById('wordCountText').innerText = "الكلمات: 0/15"; // تصفير العداد
 }
 
-// عرض الأخبار
+async function uploadNews() {
+    const titleInput = document.getElementById('newsTitle');
+    const contentInput = document.getElementById('newsContent');
+    
+    if(!titleInput.value || !contentInput.value) return alert("يرجى إكمال البيانات");
+    if(titleInput.value.split(/\s+/).length > 15) return alert("العنوان يتجاوز 15 كلمة!");
+
+    try {
+        await db.collection("news_posts").add({
+            title: titleInput.value,
+            content: contentInput.value,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // تصفير الحقول والعداد
+        titleInput.value = "";
+        contentInput.value = "";
+        document.getElementById('wordCountText').innerText = "الكلمات: 0/15";
+
+        // منطق الـ 150 عنوان: حذف الأقدم
+        const snapshot = await db.collection("news_posts").orderBy("timestamp", "desc").get();
+        if(snapshot.size > 150) {
+            const oldestId = snapshot.docs[snapshot.size - 1].id;
+            await db.collection("news_posts").doc(oldestId).delete();
+        }
+
+        alert("تم النشر بنجاح 🍉");
+    } catch (error) {
+        alert("خطأ في النشر: " + error.message);
+    }
+}
+
+// --- دوال العرض (الزوار والمشتركين) ---
+
 function loadNews() {
+    const container = document.getElementById('news-container');
+    const manageList = document.getElementById('manage-news-list');
+
     db.collection("news_posts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-        const container = document.getElementById('news-container');
-        const manageList = document.getElementById('manage-news-list');
         container.innerHTML = "";
-        manageList.innerHTML = "";
+        if(manageList) manageList.innerHTML = "";
 
         snapshot.forEach(doc => {
             const data = doc.data();
             const user = auth.currentUser;
-
-            // منطق عرض 5 كلمات للزائر والعنوان كاملاً للمشترك
+            
+            // القاعدة: 5 كلمات فقط للزائر، العنوان كاملاً للمسجل
             const displayTitle = user ? data.title : data.title.split(' ').slice(0, 5).join(' ') + "...";
             const displayContent = user ? data.content : "";
 
@@ -89,9 +115,9 @@ function loadNews() {
                 </div>
             `;
 
-            if(user) {
+            if(user && manageList) {
                 manageList.innerHTML += `
-                    <div class="news-card">
+                    <div class="news-card" style="border-right-color: #555">
                         <p>${data.title}</p>
                         <button onclick="deleteNews('${doc.id}')">حذف 🗑️</button>
                     </div>
@@ -100,33 +126,34 @@ function loadNews() {
         });
     });
 }
-// دالة التسجيل (ستعمل الآن لأن auth تم تعريفه في الأعلى)
-        
+
+function deleteNews(id) {
+    if(confirm("هل أنت متأكد من حذف هذا الخبر؟")) {
+        db.collection("news_posts").doc(id).delete();
+    }
 }
-// نظام تسجيل الدخول والخروج
+
+// --- دوال الحسابات ---
+
 function handleSignUp() {
     const email = document.getElementById('userEmail').value;
     const pass = document.getElementById('userPass').value;
     auth.createUserWithEmailAndPassword(email, pass)
-      .then(() => { alert("تم تسجيلك!"); showSection('home'); })
-  .catch(err => { alert(err.message); });
+        .then(() => { alert("تم تسجيل مشترك جديد بنجاح!"); showSection('home'); })
+        .catch(err => alert("خطأ في التسجيل: " + err.message));
 }
 
 function handleAuth() {
     const email = document.getElementById('userEmail').value;
     const pass = document.getElementById('userPass').value;
-    auth.signInWithEmailAndPassword(email, pass).then(() => { alert("مرحباً بك!"); showSection('home'); });
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(() => { alert("مرحباً بك مجدداً!"); showSection('home'); })
+        .catch(err => alert("خطأ في الدخول: " + err.message));
 }
 
 function handleLogout() {
-    auth.signOut().then(() => { location.reload(); });
+    auth.signOut().then(() => {
+        alert("تم تسجيل الخروج");
+        location.reload(); // العودة للواجهة الأولى
+    });
 }
-
-auth.onAuthStateChanged(user => {
-    if(user) {
-        document.getElementById('loginBtn').classList.add('hidden');
-        document.getElementById('logoutBtn').classList.remove('hidden');
-        document.getElementById('adminBtn').classList.remove('hidden');
-    }
-    loadNews();
-});
